@@ -7,7 +7,6 @@ from cv2 import kmeans
 from matplotlib.lines import Line2D
 from matplotlib import pyplot as plt
 from scipy.stats import pearsonr
-from sympy import zeros
 from pearson import pearson_correlation
 
 """This file implemented the functional data analysis of the pre-processed data"""

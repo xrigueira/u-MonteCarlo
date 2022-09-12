@@ -1,4 +1,4 @@
-
+import os
 import numpy as np
 import pandas as pd
 
@@ -9,12 +9,13 @@ from matplotlib import pyplot as plt
 from pearson import pearson_correlation
 
 # Results of the ideal "x" values for each variable
-# x = [1, 0.852] # Amonio, Conductividad, Nitratos, Oxigeno disuelto, pH, Temperatura, Turbidez
+# x = [1, 1.1 0.72, 1.45, 1.34, 1.4, 1.81] # Amonio, Caudal Conductividad, Nitratos, Oxigeno disuelto, pH, Temperatura, Turbidez
 
-def dataGen(varName, x):
+def dataGen(File, x):
 
     # Load the original data
-    df = pd.read_csv(f'Database/{varName}_full.csv', delimiter=';', parse_dates=['date'])
+    fileName, fileExtension = os.path.splitext(File)
+    df = pd.read_csv(f'Database/{fileName}.csv', delimiter=';', parse_dates=['date'])
     # df['value'].plot(alpha=0.5)
 
     # Clean data to get the variation 
@@ -64,12 +65,12 @@ def dataGen(varName, x):
             # Calculate the local variation
             if nan_situation == False:
 
-                local_variation = ((data[i]-data[i-1])/(data[i-1]))/1 # pH 0.7, O2 0.7, Cond 1.4, Nit 0.7, Temp 0.66
+                local_variation = ((data[i]-data[i-1])/(data[i-1]))/1
 
                 if np.isnan(local_variation) == True:
 
                     local_variation = ((data[nan_jumps[counter]]-data[i-1])/(data[i-1]))/(nan_jumps[counter]-i)
-                    local_variation = local_variation/x # O2 1.3 Cond 0.71
+                    local_variation = local_variation/x # O2 1.3
 
                     counter += 1
 
@@ -107,11 +108,10 @@ def dataGen(varName, x):
     df_gen['value'] = np.array(generated_data)
     # df_gen['value'].plot(alpha=0.5)
 
-
     # plt.show()
 
     # Save the database generated as csv
-    # df.to_csv(f'Database/{varName}_gen.csv', sep=';', encoding='utf-8', index=False, header=['date', 'value'])
+    df.to_csv(f'Database/{varName}_gen.csv', sep=';', encoding='utf-8', index=False, header=['date', 'value'])
 
     return data, data_clean, generated_data
 
@@ -119,18 +119,19 @@ def dataGen(varName, x):
 if __name__ == '__main__':
 
     start = datetime.now()
-    # Amonio, Conductividad, Nitratos, Oxigeno disuelto, pH, Temperatura, Turbidez
-    varName = 'Nitratos'
+    # Amonio, Caudal, Conductividad, Nitratos, Oxigeno disuelto, pH, Temperatura, Turbidez
+    varName = 'Caudal'
+    
+    # dataGen(File=f'{varName}_full.csv', x = x)
 
-    # dataGen(varName=varName, x=1)
-
+    # The rest of the code is to calculate the optimum value of "x"
     x_list = []
     rho_list = []
-    for x in np.arange(0.001, 2, 0.001):
+    for x in np.arange(0.01, 2, 0.01):
 
         x = round(x, 3)
         
-        data, data_clean, generated_data = dataGen(varName=varName, x=x)
+        data, data_clean, generated_data = dataGen(File=f'{varName}_full.csv', x = x)
 
         # Delete those points in generated_data for which data has nan.
         generated_data_clean = []
@@ -144,6 +145,10 @@ if __name__ == '__main__':
 
         x_list.append(x)
         rho_list.append(rho)
+    
+    plt.plot(rho_list)
+    plt.xticks(np.arange(len(x_list)), x_list)
+    plt.show()
 
     print('Ideal x:', x_list[rho_list.index(max(rho_list))])
 
