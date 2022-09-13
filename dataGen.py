@@ -15,7 +15,7 @@ def dataGen(File, x):
 
     # Load the original data
     fileName, fileExtension = os.path.splitext(File)
-    df = pd.read_csv(f'Database/{fileName}.csv', delimiter=';', parse_dates=['date'])
+    df = pd.read_csv(f'Database/{fileName}.txt', delimiter=';', parse_dates=['date'])
     # df['value'].plot(alpha=0.5)
 
     # Clean data to get the variation 
@@ -44,7 +44,8 @@ def dataGen(File, x):
             nan_jumps.append(i)
 
     # Generate data 
-    date_rng = pd.date_range(start=str(df['date'].tolist()[0]), end=str(df['date'].tolist()[-1]), freq='15min')
+    # date_rng = pd.date_range(start=str(df['date'].tolist()[0]), end=str(df['date'].tolist()[-1]), freq='15min') In case of processing _full.csv
+    date_rng = df['date'].tolist()
     df_gen = pd.DataFrame(date_rng, columns=['date'])
 
     counter = 0
@@ -111,7 +112,8 @@ def dataGen(File, x):
     # plt.show()
 
     # Save the database generated as csv
-    df.to_csv(f'Database/{varName}_gen.csv', sep=';', encoding='utf-8', index=False, header=['date', 'value'])
+    # df_gen.to_csv(f'Database/{fileName[0:-5]}_gen.csv', sep=';', encoding='utf-8', index=False, header=['date', 'value']) In case of processing _full.csv
+    df_gen.to_csv(f'Database/{fileName}_gen.csv', sep=';', encoding='utf-8', index=False, header=['date', 'value'])
 
     return data, data_clean, generated_data
 
@@ -120,9 +122,9 @@ if __name__ == '__main__':
 
     start = datetime.now()
     # Amonio, Caudal, Conductividad, Nitratos, Oxigeno disuelto, pH, Temperatura, Turbidez
-    varName = 'Caudal'
-    
-    # dataGen(File=f'{varName}_full.csv', x = x)
+    varName = 'Conductividad'
+
+    # dataGen(File=f'{varName}.txt', x = x)
 
     # The rest of the code is to calculate the optimum value of "x"
     x_list = []
@@ -131,7 +133,7 @@ if __name__ == '__main__':
 
         x = round(x, 3)
         
-        data, data_clean, generated_data = dataGen(File=f'{varName}_full.csv', x = x)
+        data, data_clean, generated_data = dataGen(File=f'{varName}.txt', x = x)
 
         # Delete those points in generated_data for which data has nan.
         generated_data_clean = []
