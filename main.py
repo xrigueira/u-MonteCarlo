@@ -43,30 +43,30 @@ def x_selector(varName):
 
 # Amonio, Caudal, Conductividad, Nitratos, Oxigeno disuelto, pH, Temperatura, Turbidez
 varName = 'Conductividad'
-timeFrame = 'b'
+timeFrame = 'c'
 
 if __name__ == '__main__':
     
-    # start = datetime.now()
+    start = datetime.now()
 
-    # # Generate the data
-    # x = x_selector(varName=varName)
-    # dataGen(File=f'{varName}.txt', x=x)
-    # print('[INFO] dataGen() DONE')
+    # Generate the data
+    x = x_selector(varName=varName)
+    dataGen(File=f'{varName}.txt', x=x)
+    print('[INFO] dataGen() DONE')
 
-    # # Fill in the gaps in the time series
-    # checkGaps(File=f'{varName}_gen.txt')
-    # print('[INFO] checkGaps() DONE')
+    # Fill in the gaps in the time series
+    checkGaps(File=f'{varName}_gen.txt')
+    print('[INFO] checkGaps() DONE')
 
-    # # Normalize the data. See normalizer.py for details
-    # normalizer(File=f'{varName}_full.csv')
-    # print('[INFO] normalizer() DONE')
+    # Normalize the data. See normalizer.py for details
+    normalizer(File=f'{varName}_full.csv')
+    print('[INFO] normalizer() DONE')
     
-    # # Filter out those time units with too many NaN and iterate on the rest
-    # # The only gaps will be the inserted days in normalizer so this function has to be calleds despite that
-    # # there are no other nans
-    # filterer(File=f'{varName}_nor.csv', timeframe=timeFrame)
-    # print('[INFO] filterer() DONE')
+    # Filter out those time units with too many NaN and iterate on the rest
+    # The only gaps will be the inserted days in normalizer so this function has to be calleds despite that
+    # there are no other nans
+    filterer(File=f'{varName}_nor.csv', timeframe=timeFrame)
+    print('[INFO] filterer() DONE')
 
     # Read the database with the desired time unit and create dataMatrix and timeStamps
     dataMatrix, timeStamps = builder(File=f'{varName}_pro.csv', timeFrame=timeFrame)
@@ -83,6 +83,6 @@ if __name__ == '__main__':
     outliers, outliersBoosted = functionalAnalysis(varname=varName, depthname='modified band', datamatrix=dataMatrix, timestamps=timeStamps, timeframe=timeFrame, depth=modifiedbandDepth, cutoff=cutoffIntMS)
     print('[INFO] functionalAnalysis() DONE')
         
-    # end = datetime.now()
+    end = datetime.now()
 
-    # print("Time elapsed in execution:", end-start)
+    print("Time elapsed in execution:", end-start)

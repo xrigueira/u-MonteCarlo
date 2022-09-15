@@ -320,7 +320,7 @@ def msplot(varname, depthname, timestamps, depth, cutoff, smootheddata, smoothed
         labels = np.copy(funcMSPlot.outliers.astype(int))
         labels[:] = 0
         labels[indexFinal] = 1
-        
+
         # # Copy of the labels list for the control charts
         # outliersCCBoosted = list(labels.copy())
         
