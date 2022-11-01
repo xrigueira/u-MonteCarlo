@@ -43,19 +43,20 @@ def x_selector(varName):
 
 # Amonio, Caudal, Conductividad, Nitratos, Oxigeno disuelto, pH, Temperatura, Turbidez
 varName = 'Conductividad'
-timeFrame = 'c'
+timeFrame = 'b'
 
 if __name__ == '__main__':
     
     start = datetime.now()
 
-    # Generate the data
-    x = x_selector(varName=varName)
-    dataGen(File=f'{varName}.txt', x=x)
-    print('[INFO] dataGen() DONE')
+    # Generate the data (optional)
+    # x = x_selector(varName=varName)
+    # dataGen(File=f'{varName}.txt', x=x)
+    # print('[INFO] dataGen() DONE')
 
     # Fill in the gaps in the time series
-    checkGaps(File=f'{varName}_gen.txt')
+    # checkGaps(File=f'{varName}_gen.csv')
+    checkGaps(File=f'{varName}.txt')
     print('[INFO] checkGaps() DONE')
 
     # Normalize the data. See normalizer.py for details
@@ -63,7 +64,7 @@ if __name__ == '__main__':
     print('[INFO] normalizer() DONE')
     
     # Filter out those time units with too many NaN and iterate on the rest
-    # The only gaps will be the inserted days in normalizer so this function has to be calleds despite that
+    # The only gaps will be the inserted days in normalizer so this function has to be called despite that
     # there are no other nans
     filterer(File=f'{varName}_nor.csv', timeframe=timeFrame)
     print('[INFO] filterer() DONE')
@@ -82,6 +83,8 @@ if __name__ == '__main__':
     
     outliers, outliersBoosted = functionalAnalysis(varname=varName, depthname='modified band', datamatrix=dataMatrix, timestamps=timeStamps, timeframe=timeFrame, depth=modifiedbandDepth, cutoff=cutoffIntMS)
     print('[INFO] functionalAnalysis() DONE')
+    
+    # The MC loop has to start here
         
     end = datetime.now()
 

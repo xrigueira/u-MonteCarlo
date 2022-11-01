@@ -10,8 +10,8 @@ def checkGaps(File):
 
     # Read the file
     fileName, fileExtension = os.path.splitext(File)
-    dateParser = lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M:%S') # It is 4 times faster with the parser
-    df = pd.read_csv(f'Database/{fileName}.csv', delimiter=';', parse_dates=['date'], date_parser=dateParser, index_col=['date'])
+    dateParser = lambda x: datetime.strptime(x, '%d-%m-%Y %H:%M:%S') # It is 4 times faster with the parser
+    df = pd.read_csv(f'Database/{fileName}.txt', delimiter=';', parse_dates=['date'], date_parser=dateParser, index_col=['date'])
 
     # Remove the index duplication
     df = df.loc[~df.index.duplicated(), :]
@@ -28,5 +28,5 @@ def checkGaps(File):
     df.index.name = 'date'
     
     # Save the db to csv
-    df.to_csv(f'Database/{fileName[0:-4]}_full.csv', sep=';', encoding='utf-8', index=True, header=['value'])
+    df.to_csv(f'Database/{fileName}_full.csv', sep=';', encoding='utf-8', index=True, header=['value'])
 
