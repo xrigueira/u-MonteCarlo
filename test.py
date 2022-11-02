@@ -1,22 +1,63 @@
-
+import math
+import random
 import pandas as pd
 
+def magnitude_outliers(df_clean, new_outliers, num_cont_outliers, input_outliers):
+    
+    # Generate the magnitude outliers
+    for i in new_outliers[0:num_cont_outliers]:
+
+        mag_factor = random.uniform(1.5, 2.5)
+        df_clean.value = df_clean.apply(lambda row: (row.value * mag_factor) if row.week == i else row.value, axis=1)
+        
+        new_outliers.remove(i)
+        input_outliers.append(i)
+    
+    return(df_clean, new_outliers, input_outliers)
+
+def shape_outliers(df_clean, new_outliers, num_cont_outliers, input_outliers):
+
+    # Generate the shape outliers
+    for i in new_outliers[0:num_cont_outliers]:
+
+        df_clean.value = df_clean.apply(lambda row: (row.value + row.value * (0.025 * math.sin(100000 * row.value))) if row.week == i else row.value, axis=1)
+
+        new_outliers.remove(i)
+        input_outliers.append(i)
+    
+    return(df_clean, new_outliers, input_outliers)
+
+def mixed_outliers(df_clean, new_outliers, num_cont_outliers, input_outliers):
+
+    # Generate the mixed outliers
+    for i in new_outliers[0:num_cont_outliers]:
+
+        mag_factor = random.uniform(1.5, 2.5)
+        df_clean.value = df_clean.apply(lambda row: ((row.value + row.value * (0.025 * math.sin(100000 * row.value))) * mag_factor) if row.week == 1 else row.value, axis=1)
+
+        new_outliers.remove(i)
+        input_outliers.append(i)
+    
+    return(df_clean, new_outliers, input_outliers)
+
+varName = 'Conductividad'
 timeFrame = 'b'
 outliersBoosted = ["('2019 12 2', '2019 12 8')", "('2020 3 7', '2020 3 13')", "('2020 9 24', '2020 9 30')", "('2020 12 15', '2020 12 21')", "('2020 12 29', '2021 1 4')", "('2021 1 12', '2021 1 18')", "('2021 1 19', '2021 1 25')", "('2021 2 2', '2021 2 8')", "('2021 2 9', '2021 2 15')", "('2021 5 21', '2021 5 27')", "('2021 10 6', '2021 10 12')", "('2021 10 13', '2021 10 19')", "('2021 10 20', '2021 10 26')", "('2021 10 27', '2021 11 2')", "('2021 11 3', '2021 11 9')", "('2021 12 14', '2021 12 20')"]
 
-def deleter(timeframe, outliersBoosted):
+def outlier_generator(varname, timeframe, outliersBoosted):
 
+    # Delete the outliers depending on the timeFrame chosen
     if timeFrame == 'a':
         
         # This should operate in a similar way to timeFrame == 'c'
         print('This timeFrame option has not been implemented yet.')
         pass
-        
+    
     
     elif timeframe == 'b': 
         
         # Read the data base processed
-        df = pd.read_csv(f'Database/Conductividad_pro.csv', delimiter=';')
+        df = pd.read_csv(f'Database/{varname}_pro.csv', delimiter=';')
         
         # Split the start and end dates
         outliers_clean = [i.split(',') for i in outliersBoosted]
@@ -33,7 +74,7 @@ def deleter(timeframe, outliersBoosted):
         # Delete those rows with week in outling_weeks
         for i in outlying_weeks:
             
-            df = df.drop(df[df['week'] == i].index, inplace=False)
+            df_clean = df.drop(df[df['week'] == i].index, inplace=False)
 
 
     elif timeFrame == 'c':
@@ -67,9 +108,21 @@ def deleter(timeframe, outliersBoosted):
             df = df.drop(df.index[int(i-counter*lenDay):int(j-counter*lenDay+1)], inplace=False)
             counter += 1
 
-    return(df)
+    # Contaminate the database
+    # Get a 15% of random weeks to define the number of outliers
+    weeks = list(dict.fromkeys(df_clean['week'].tolist()))
+    weeks = [i for i in weeks if i != 0]
 
-df = deleter(timeframe=timeFrame, outliersBoosted=outliersBoosted)
+    num_outliers = int(len(weeks) * 0.15)
 
-# Contuar metiendo los modelos de contaminación
+    # Draw num_outliers randomly from weeks
+    new_outliers = random.sample(weeks, num_outliers)
 
+    # Define how many weeks will be outliers in each model (33 % of num_outliers)
+    num_cont_outliers = int(len(new_outliers) / 3)
+
+    input_outliers = [] # This is needed because num_outliers my not be divisible by 3
+
+    # Call the functions for the contamination models
+
+outlier_generator(varname = varName, timeframe=timeFrame, outliersBoosted=outliersBoosted)
