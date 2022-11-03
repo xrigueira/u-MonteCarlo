@@ -200,25 +200,25 @@ def msplot(varname, depthname, timestamps, depth, cutoff, smootheddata, smoothed
     # # plt.show()
     
     # Plotly implementation to display the results on the browser
-    # dataPly = []
-    # for i in (smootheddatagrid.data_matrix).tolist():
-    #     dataPly.append(flatter(i))
+    dataPly = []
+    for i in (smootheddatagrid.data_matrix).tolist():
+        dataPly.append(flatter(i))
     
-    # dfPlotly = pd.DataFrame.from_records(dataPly)
-    # dfPlotly = dfPlotly.transpose()
-    # dfPlotly.columns = timestamps 
+    dfPlotly = pd.DataFrame.from_records(dataPly)
+    dfPlotly = dfPlotly.transpose()
+    dfPlotly.columns = timestamps 
     
-    # # Create color dictionary
-    # outliersMSPlotP = list(outliersMSPlot)
-    # for i, j in enumerate(outliersMSPlotP):
-    #     if j == True:
-    #         outliersMSPlotP[i] = 'red'
-    #     elif j == False:
-    #         outliersMSPlotP[i] = 'blue'
+    # Create color dictionary
+    outliersMSPlotP = list(outliersMSPlot)
+    for i, j in enumerate(outliersMSPlotP):
+        if j == True:
+            outliersMSPlotP[i] = 'red'
+        elif j == False:
+            outliersMSPlotP[i] = 'blue'
 
-    # colorDict = {}
-    # for i, j in zip(timestamps, outliersMSPlotP):
-    #     colorDict.update({i: j})
+    colorDict = {}
+    for i, j in zip(timestamps, outliersMSPlotP):
+        colorDict.update({i: j})
     
     # # Graph the results
     # fig = go.Figure()
@@ -324,40 +324,40 @@ def msplot(varname, depthname, timestamps, depth, cutoff, smootheddata, smoothed
         # # Copy of the labels list for the control charts
         # outliersCCBoosted = list(labels.copy())
         
-        # fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
 
-        # ax1.scatter(funcMSPlot.points[:, 0], funcMSPlot.points[:, 1], c=funcMSPlot.colormap(colors))
-        # ax1.set_title("MS-Plot")
-        # ax1.set_xlabel("Magnitude outlyingness")
-        # ax1.set_ylabel("Shape outlyingness")
+        ax1.scatter(funcMSPlot.points[:, 0], funcMSPlot.points[:, 1], c=funcMSPlot.colormap(colors))
+        ax1.set_title("MS-Plot")
+        ax1.set_xlabel("Magnitude outlyingness")
+        ax1.set_ylabel("Shape outlyingness")
 
-        # ax2.set_title(f'Functional weekly data ' + label_title)
-        # ax2.set_xlabel('Time (15min intervals)')
-        # ax2.set_ylabel(label_y_axis)
+        ax2.set_title(f'Functional weekly data ' + label_title)
+        ax2.set_xlabel('Time (15min intervals)')
+        ax2.set_ylabel(label_y_axis)
         
-        # colormap = plt.cm.get_cmap('seismic')
-        # smootheddata.plot(group=labels, group_colors=colormap([color, outliercolor]), group_names=['No outliers', 'Outliers'], axes=ax2)
+        colormap = plt.cm.get_cmap('seismic')
+        smootheddata.plot(group=labels, group_colors=colormap([color, outliercolor]), group_names=['No outliers', 'Outliers'], axes=ax2)
         
         # Plotly implementation to display the results on the browser
-        # dataPly = []
-        # for i in (smootheddatagrid.data_matrix).tolist():
-        #     dataPly.append(flatter(i))
+        dataPly = []
+        for i in (smootheddatagrid.data_matrix).tolist():
+            dataPly.append(flatter(i))
         
-        # dfPlotly = pd.DataFrame.from_records(dataPly)
-        # dfPlotly = dfPlotly.transpose()
-        # dfPlotly.columns = timestamps
+        dfPlotly = pd.DataFrame.from_records(dataPly)
+        dfPlotly = dfPlotly.transpose()
+        dfPlotly.columns = timestamps
         
-        # # Create color dictionary
-        # labelsPlotly = list(labels)
-        # for i, j in enumerate(labels):
-        #     if j == 1:
-        #         labelsPlotly[i] = 'red'
-        #     elif j == 0:
-        #         labelsPlotly[i] = 'blue'
+        # Create color dictionary
+        labelsPlotly = list(labels)
+        for i, j in enumerate(labels):
+            if j == 1:
+                labelsPlotly[i] = 'red'
+            elif j == 0:
+                labelsPlotly[i] = 'blue'
 
-        # colorDict = {}
-        # for i, j in zip(timestamps, labelsPlotly):
-        #     colorDict.update({i: j})
+        colorDict = {}
+        for i, j in zip(timestamps, labelsPlotly):
+            colorDict.update({i: j})
         
         # # Graph the results
         # fig = go.Figure()
@@ -377,7 +377,7 @@ def msplot(varname, depthname, timestamps, depth, cutoff, smootheddata, smoothed
 
     # print(outIntDepth)
     # print('time stamps:', timeStamps)
-    print('outliers:', np.round(len(outliers)/len(timestamps), 3), outliers)
+    # print('outliers:', np.round(len(outliers)/len(timestamps), 3), outliers)
     
     if all(outliersMSPlot == 0) == False:
 
@@ -387,9 +387,9 @@ def msplot(varname, depthname, timestamps, depth, cutoff, smootheddata, smoothed
 
         dfOutliers = pd.DataFrame(list(zip(outliersMag, outlierShape)), index=outliersBoosted, columns=['magnitud', 'shape'])
         
-        print('outliers boosted:', np.round(len(outliersBoosted)/len(timestamps), 3), outliersBoosted)
-        print(dfOutliers)
-        print('Average magnitude: {} | Average shape: {}'.format(np.average(mag), np.average(shape)))
+        # print('outliers boosted:', np.round(len(outliersBoosted)/len(timestamps), 3), outliersBoosted)
+        # print(dfOutliers)
+        # print('Average magnitude: {} | Average shape: {}'.format(np.average(mag), np.average(shape)))
     
     else:
 
