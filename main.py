@@ -89,7 +89,7 @@ if __name__ == '__main__':
     # The MC loop has to start here
     accuracies = []
     counter = 0
-    while counter < 5:
+    while counter < 1:
     
         input_outliers = outlier_generator(varname = varName, timeframe=timeFrame, outliersBoosted=outliersBoosted)
 
@@ -97,7 +97,7 @@ if __name__ == '__main__':
         dataMatrix, timeStamps = builder(File=f'{varName}_con.csv', timeFrame=timeFrame)
         print(f'[INFO] builder() DONE {counter}')
 
-        outliers, outliersBoosted = functionalAnalysis(varname=varName, depthname='modified band', datamatrix=dataMatrix, timestamps=timeStamps, timeframe=timeFrame, depth=modifiedbandDepth, cutoff=cutoffIntMS)
+        outliers, outliersBoosted_mc = functionalAnalysis(varname=varName, depthname='modified band', datamatrix=dataMatrix, timestamps=timeStamps, timeframe=timeFrame, depth=modifiedbandDepth, cutoff=cutoffIntMS)
         print(f'[INFO] functionalAnalysis() DONE {counter}')
 
         # Get the accuracy for each interation
@@ -105,22 +105,22 @@ if __name__ == '__main__':
         df = pd.read_csv(f'Database/{varName}_con.csv', delimiter=';')
 
         # Split the start and end dates
-        outliers_clean = [i.split(',') for i in outliersBoosted]
+        outliers_clean = [i.split(',') for i in outliersBoosted_mc]
         outliers_startDate = [i[0][2:-1] for i in outliers_clean]
         outliers_endDate = [i[1][2:-2] for i in outliers_clean]
 
         # Get the week nunmber of the detected outlying weeks
-        outlying_weeks = []
+        outlying_weeks_mc = []
         for i in outliers_startDate:
             
             index = df.loc[df['startDate'] == i, 'week'].iloc[0]
-            outlying_weeks.append(index)
+            outlying_weeks_mc.append(index)
         
         print('Artificial outliers', input_outliers)
-        print('Detected in MC', outlying_weeks)
+        print('Detected in MC', outlying_weeks_mc)
 
         # Check which artificial outliers have been detected
-        check =  [i for i in input_outliers if i in outlying_weeks]
+        check =  [i for i in input_outliers if i in outlying_weeks_mc]
 
         accuracy = (len(check)) / (len(input_outliers))
         print(f'Accuracy of iteration {counter}: {accuracy}')
@@ -129,8 +129,8 @@ if __name__ == '__main__':
 
         counter += 1
 
-    # final_accuracy = np.mean(accuracies)
-    # print('Final accuracy', final_accuracy)
+    final_accuracy = np.mean(accuracies)
+    print('Final accuracy', final_accuracy)
 
     end = datetime.now()
 
