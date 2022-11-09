@@ -1,13 +1,40 @@
 import math
 import random
+import numpy as np
 import pandas as pd
+
+def mag_factor_calc(dataframe, i):
+
+    # Extract the maximum and minimum of the database
+    maximum, mean, minimum = max(dataframe.loc[:, 'value']), np.mean(dataframe.loc[:, 'value']), min(dataframe.loc[:, 'value'])
+    # p90, p10 = np.percentile(dataframe.loc[:, 'value'], 90), np.percentile(dataframe.loc[:, 'value'], 10)
+
+    # Get the mean of the target time interval (month, week, day)
+    target = np.mean(dataframe.loc[dataframe['week'] == i, 'value'])
+
+    # Get the distances to max and min
+    dist2max, dist2min = maximum - target, target - minimum
+
+    # Now define mag_factor based on whether the target is close to the max or min
+    if dist2min < dist2max: # lower half
+
+        mag_factor = ((minimum / target) - (1 - (target / mean)))
+    
+    elif dist2min > dist2max: # upper half
+
+        mag_factor = ((maximum / target) + (1 - (mean / target)))
+    
+    
+    return(mag_factor)
+
 
 def magnitude_outliers(df_clean, new_outliers, num_cont_outliers, input_outliers):
     
     # Generate the magnitude outliers
     for i in new_outliers[0:num_cont_outliers]:
 
-        mag_factor = random.choice([random.uniform(-1.5, -0.75), random.uniform(1.5, 2.5)])
+        # mag_factor = random.choice([random.uniform(-1.5, -0.75), random.uniform(2.5, 4.5)])
+        mag_factor = mag_factor_calc(dataframe=df_clean, i=i)
         df_clean.value = df_clean.apply(lambda row: (row.value * mag_factor) if row.week == i else row.value, axis=1)
         df_clean.outlier = df_clean.apply(lambda row: 1 if row.week == i else row.outlier, axis=1)
 
@@ -18,35 +45,60 @@ def magnitude_outliers(df_clean, new_outliers, num_cont_outliers, input_outliers
 
 def shape_outliers(df_clean, new_outliers, num_cont_outliers, input_outliers):
 
-    index = 0
     # Generate the shape outliers
     for i in new_outliers[0:num_cont_outliers]:
-
-        # df_clean.value = df_clean.apply(lambda row: (row.value + row.value * (0.025 * math.sin(100000 * row.value))) if row.week == i else row.value, axis=1)
-        df_clean.value = df_clean.apply(lambda row: (row.value * (1 + (0.01 * math.sin(0.5 * index)))) if row.week == i else row.value, axis=1)
-        df_clean.outlier = df_clean.apply(lambda row: 1 if row.week == i else row.outlier, axis=1)
-
+        
+        df_subset = df_clean.loc[df_clean['week'] == i]
+        
+        indices = list(df_subset.index)
+        for j in indices:
+            
+            df_clean.loc[j, 'value'] = df_clean.loc[j, 'value'] * (1 + (0.2 * math.sin(0.05 * j)))
+            df_clean.loc[j, 'outlier'] = 1
+        
         new_outliers.remove(i)
         input_outliers.append(i)
+    
+    # Old method
+    # for i in new_outliers[0:num_cont_outliers]:
 
-        index += 1
+    #     df_clean.value = df_clean.apply(lambda row: (row.value + row.value * (0.025 * math.sin(100000 * row.value))) if row.week == i else row.value, axis=1)
+    #     df_clean.outlier = df_clean.apply(lambda row: 1 if row.week == i else row.outlier, axis=1)
+
+    #     new_outliers.remove(i)
+    #     input_outliers.append(i)
     
     return(df_clean, new_outliers, input_outliers)
 
 def mixed_outliers(df_clean, new_outliers, num_cont_outliers, input_outliers):
 
-    index = 0
     # Generate the mixed outliers
     for i in new_outliers[0:num_cont_outliers]:
-
-        mag_factor = random.choice([random.uniform(-1.5, -0.75), random.uniform(1.5, 2.5)])
-        df_clean.value = df_clean.apply(lambda row: ((row.value * (1 + (0.01 * math.sin(0.5 * index)))) * mag_factor) if row.week == i else row.value, axis=1)
-        df_clean.outlier = df_clean.apply(lambda row: 1 if row.week == i else row.outlier, axis=1)
-
+        
+        # mag_factor = random.choice([random.uniform(-1.5, -0.75), random.uniform(2.5, 4.5)])
+        mag_factor = mag_factor_calc(dataframe=df_clean, i=i)
+        
+        df_subset = df_clean.loc[df_clean['week'] == i]
+        
+        indices = list(df_subset.index)
+        
+        for j in indices:
+            
+            df_clean.loc[j, 'value'] = (df_clean.loc[j, 'value'] * (1 + (0.2 * math.sin(0.05 * j)))) * mag_factor
+            df_clean.loc[j, 'outlier'] = 1
+        
         new_outliers.remove(i)
         input_outliers.append(i)
+    
+    # Old method
+    # for i in new_outliers[0:num_cont_outliers]:
 
-        index += 1
+    #     mag_factor = random.choice([random.uniform(-1.5, -0.75), random.uniform(1.5, 2.5)])
+    #     df_clean.value = df_clean.apply(lambda row: ((row.value + row.value * (0.025 * math.sin(100000 * row.value))) * mag_factor) if row.week == i else row.value, axis=1)
+    #     df_clean.outlier = df_clean.apply(lambda row: 1 if row.week == i else row.outlier, axis=1)
+
+    #     new_outliers.remove(i)
+    #     input_outliers.append(i)
     
     return(df_clean, new_outliers, input_outliers)
 

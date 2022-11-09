@@ -1,35 +1,40 @@
 # See how to get the index to use it in the shape contamination model
 
 import math
+import numpy as np
 import pandas as pd
 
-df = pd.read_csv('Database/Conductividad_con.csv', delimiter=';')
+df = pd.read_csv('Database/Conductividad_pro.csv', delimiter=';')
 
 # new_outliers = [9, 18, 32]
-new_outliers = [9]
+new_outliers = [6, 9, 18, 32]
 print((df.loc[df['week'] == 9]))
 # Generate the shape outliers
 for i in new_outliers:
 
-    df_subset = df.loc[df['week'] == i]
+    # Extract the maximum and minimum of the database
+    maximum, mean, minimum = max(df.loc[:, 'value']), np.mean(df.loc[:, 'value']), min(df.loc[:, 'value'])
+    p90, p10 = np.percentile(df.loc[:, 'value'], 90), np.percentile(df.loc[:, 'value'], 10)
+    print(maximum, minimum)
+    # print(p90, p10)
 
-    indices = list(df_subset.index)
-    for j in indices:
+    target = np.mean(df.loc[df['week'] == i, 'value'])
+    print('target', target)
 
-        # df_subset.value = df_subset.apply(lambda row: (row.value * (1 + (0.01 * math.sin(0.5 * j)))) if row.name == j else row.value, axis=1)
-        # df_subset.outlier = df_subset.apply(lambda row: 1 if row.name == j else row.outlier, axis=1)
-        
-        # Testing new method
-        df.loc[j, 'value'] = df.loc[j, 'value'] * (1 + (0.01 * math.sin(0.5 * j)))
-        df.loc[j, 'outlier'] = 1
-        # print((df.loc[df['week'] == 9]).head(10))
+    # Get the distances to max and min
+    dist2max, dist2min = maximum - target, target - minimum
 
+    # Now define mag_factor based on whether the target is close to the max or min
+    if dist2min < dist2max:
+
+        print('por debajo')
+
+        mag_factor = ((minimum / target) - (1 - (target / mean)))
     
-    # new_outliers.remove(i)
-    # input_outliers.append(i)
+    elif dist2min > dist2max:
 
-# df.loc[indices[0]:indices[-1], 'value'] = df_subset['value']
+        print('por arriba')
 
-print((df.loc[df['week'] == 9]))
-
-
+        mag_factor = ((maximum / target) - (1 - (mean / target)))
+    
+    print(mag_factor)

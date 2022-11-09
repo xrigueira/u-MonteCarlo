@@ -63,13 +63,13 @@ def dataGrid(datamatrix, timeframe):
     functionalData = fda.FDataGrid(data_matrix=datamatrix, grid_points=gridPoints)
     
     # Plotting the data
-    # fig, axes = plt.subplots()
+    fig, axes = plt.subplots()
     
-    # functionalData.plot(axes=axes)
+    functionalData.plot(axes=axes)
     
-    # axes.set_title(f'Original data {varName}')
-    # axes.set_xlabel('Days')
-    # axes.set_ylabel(f'{varName}')
+    axes.set_title(f'Original data')
+    axes.set_xlabel('Data points')
+    axes.set_ylabel(f'Data values')
     # fig.savefig(f'original_{varName}.png')
     
     return gridPoints, functionalData
@@ -93,7 +93,7 @@ def smoothing(datamatrix, gridpoints, functionaldata):
         # rho, p = pearsonr(np.array(dataMatrixFlat), np.array(flatevaluatingPoints))
         rho = pearson_correlation(dataMatrixFlat, flatevaluatingPoints)
 
-        if rho >= 0.95:
+        if rho >= 0.9999 or nBasis >= 100:
             break
         else:
             continue
@@ -103,12 +103,12 @@ def smoothing(datamatrix, gridpoints, functionaldata):
     print('Number of basis functions: ', nBasis, 'and rho: ', rho)
     
     # Plotting of the smoothed functions
-    # fig, axes = plt.subplots()
+    fig, axes = plt.subplots()
     
-    # smoothedData.plot(axes=axes)
-    # axes.set_title(f'Smoothed data {varName}')
-    # axes.set_xlabel('Days')
-    # axes.set_ylabel(f'{varName}')
+    smoothedData.plot(axes=axes)
+    axes.set_title(f'Smoothed data')
+    axes.set_xlabel('Data points')
+    axes.set_ylabel('Data values')
     # fig.savefig(f'smoothed_{varName}.png')
     
     smoothedDataGrid = smoothedData.to_grid(grid_points=gridpoints) # Convert to FDataGrid for further needs
