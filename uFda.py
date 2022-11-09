@@ -408,6 +408,6 @@ def functionalAnalysis(varname, depthname, datamatrix, timestamps, timeframe, de
     
     # outliers, outliersBoosted, outliersCC, outliersCCBoosted = '', '', '', ''
     
-    plt.show()
+    # plt.show()
     
     return outliers, outliersBoosted
