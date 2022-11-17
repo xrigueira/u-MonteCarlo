@@ -7,7 +7,6 @@ from cv2 import kmeans
 from matplotlib.lines import Line2D
 from matplotlib import pyplot as plt
 from scipy.stats import pearsonr
-from sympy import zeros
 from pearson import pearson_correlation
 
 """This file implemented the functional data analysis of the pre-processed data"""
@@ -64,13 +63,13 @@ def dataGrid(datamatrix, timeframe):
     functionalData = fda.FDataGrid(data_matrix=datamatrix, grid_points=gridPoints)
     
     # Plotting the data
-    # fig, axes = plt.subplots()
+    fig, axes = plt.subplots()
     
-    # functionalData.plot(axes=axes)
+    functionalData.plot(axes=axes)
     
-    # axes.set_title(f'Original data {varName}')
-    # axes.set_xlabel('Days')
-    # axes.set_ylabel(f'{varName}')
+    axes.set_title(f'Original data')
+    axes.set_xlabel('Data points')
+    axes.set_ylabel(f'Data values')
     # fig.savefig(f'original_{varName}.png')
     
     return gridPoints, functionalData
@@ -94,22 +93,22 @@ def smoothing(datamatrix, gridpoints, functionaldata):
         # rho, p = pearsonr(np.array(dataMatrixFlat), np.array(flatevaluatingPoints))
         rho = pearson_correlation(dataMatrixFlat, flatevaluatingPoints)
 
-        if rho >= 0.95:
+        if rho >= 0.9999 or nBasis >= 100:
             break
         else:
             continue
 
-    functionaldata.plot()
-    smoothedData.plot()
+    # functionaldata.plot()
+    # smoothedData.plot()
     print('Number of basis functions: ', nBasis, 'and rho: ', rho)
     
     # Plotting of the smoothed functions
-    # fig, axes = plt.subplots()
+    fig, axes = plt.subplots()
     
-    # smoothedData.plot(axes=axes)
-    # axes.set_title(f'Smoothed data {varName}')
-    # axes.set_xlabel('Days')
-    # axes.set_ylabel(f'{varName}')
+    smoothedData.plot(axes=axes)
+    axes.set_title(f'Smoothed data')
+    axes.set_xlabel('Data points')
+    axes.set_ylabel('Data values')
     # fig.savefig(f'smoothed_{varName}.png')
     
     smoothedDataGrid = smoothedData.to_grid(grid_points=gridpoints) # Convert to FDataGrid for further needs
@@ -189,17 +188,16 @@ def msplot(varname, depthname, timestamps, depth, cutoff, smootheddata, smoothed
     outliersMSPlot = funcMSPlot.outliers
 
     # Copy of the outliers for the control charts
-    outliersCC = list(np.copy(outliersMSPlot).astype(int))
+    # outliersCC = list(np.copy(outliersMSPlot).astype(int))
     
-    funcMSPlot.plot()
-    smootheddata.plot(group=funcMSPlot.outliers.astype(int), group_colors=funcMSPlot.colormap([color, outliercolor]), group_names=['No outliers', 'Outliers'], axes=ax2)
+    # funcMSPlot.plot()
+    # smootheddata.plot(group=funcMSPlot.outliers.astype(int), group_colors=funcMSPlot.colormap([color, outliercolor]), group_names=['No outliers', 'Outliers'], axes=ax2)
     
-    # ax2.set_title(f'Outliers {depthName} depth ' + label_title)
-    ax2.set_title(f'Functional weekly data ' + label_title)
-    ax2.set_xlabel('Time (15min intervals)')
-    ax2.set_ylabel(label_y_axis)
-    # fig.savefig(f'outliers_MSPlot_{varName}.png')
-    # plt.show()
+    # ax2.set_title(f'Functional weekly data ' + label_title)
+    # ax2.set_xlabel('Time (15min intervals)')
+    # ax2.set_ylabel(label_y_axis)
+    # # fig.savefig(f'outliers_MSPlot_{varName}.png')
+    # # plt.show()
     
     # Plotly implementation to display the results on the browser
     dataPly = []
@@ -222,11 +220,11 @@ def msplot(varname, depthname, timestamps, depth, cutoff, smootheddata, smoothed
     for i, j in zip(timestamps, outliersMSPlotP):
         colorDict.update({i: j})
     
-    # Graph the results
-    fig = go.Figure()
+    # # Graph the results
+    # fig = go.Figure()
     
-    for col in dfPlotly.columns:
-        fig.add_trace(go.Scatter(x=dfPlotly.index, y=dfPlotly[col], mode='lines', name=col, marker_color=colorDict[col]))
+    # for col in dfPlotly.columns:
+    #     fig.add_trace(go.Scatter(x=dfPlotly.index, y=dfPlotly[col], mode='lines', name=col, marker_color=colorDict[col]))
     
     # fig.show()
     
@@ -248,62 +246,62 @@ def msplot(varname, depthname, timestamps, depth, cutoff, smootheddata, smoothed
         pred = modeliF.predict(funcMSPlot.points)
         probs = -1*modeliF.score_samples(funcMSPlot.points)
         
-        fig, axes = plt.subplots(1, figsize=(7, 5))
-        sp = axes.scatter(funcMSPlot.points[:, 0], funcMSPlot.points[:, 1], c=probs, cmap='rainbow')
-        fig.colorbar(sp, label='Simplified Anomaly Score')
-        axes.set_title('Isolation Forest Scores ' + label_title)
-        axes.set_ylabel("Shape outlyingness")
-        axes.set_xlabel("Magnitude outlyingness")
-        axes.set_facecolor("#F1F0E6")
-        axes.grid(color='w', linestyle='-', linewidth=1)
-        axes.set_axisbelow(True)
+        # fig, axes = plt.subplots(1, figsize=(7, 5))
+        # sp = axes.scatter(funcMSPlot.points[:, 0], funcMSPlot.points[:, 1], c=probs, cmap='rainbow')
+        # fig.colorbar(sp, label='Simplified Anomaly Score')
+        # axes.set_title('Isolation Forest Scores ' + label_title)
+        # axes.set_ylabel("Shape outlyingness")
+        # axes.set_xlabel("Magnitude outlyingness")
+        # axes.set_facecolor("#F1F0E6")
+        # axes.grid(color='w', linestyle='-', linewidth=1)
+        # axes.set_axisbelow(True)
 
         indexiF = np.where(probs >= np.quantile(probs, 0.875))
         valuesiF = funcMSPlot.points[indexiF]
 
-        fig, axes = plt.subplots(1, figsize=(6, 5))
-        axes.scatter(funcMSPlot.points[:, 0], funcMSPlot.points[:, 1])
-        axes.scatter(valuesiF[:, 0], valuesiF[:, 1], color='r')
-        axes.set_title("Isolation Forest Binarized " + label_title)
-        axes.set_ylabel("Shape outlyingness")
-        axes.set_xlabel("Magnitude outlyingness")
-        axes.set_facecolor("#F1F0E6")
-        axes.grid(color='w', linestyle='-', linewidth=1)
-        axes.set_axisbelow(True)
-        legend_elements = [Line2D([0], [0], marker='o', color='w', label='No Outliers', markerfacecolor='b', markersize=13),
-                    Line2D([0], [0], marker='o', color='w', label='Outliers', markerfacecolor='r', markersize=13)]
-        axes.legend(handles=legend_elements, loc='best')
+        # fig, axes = plt.subplots(1, figsize=(6, 5))
+        # axes.scatter(funcMSPlot.points[:, 0], funcMSPlot.points[:, 1])
+        # axes.scatter(valuesiF[:, 0], valuesiF[:, 1], color='r')
+        # axes.set_title("Isolation Forest Binarized " + label_title)
+        # axes.set_ylabel("Shape outlyingness")
+        # axes.set_xlabel("Magnitude outlyingness")
+        # axes.set_facecolor("#F1F0E6")
+        # axes.grid(color='w', linestyle='-', linewidth=1)
+        # axes.set_axisbelow(True)
+        # legend_elements = [Line2D([0], [0], marker='o', color='w', label='No Outliers', markerfacecolor='b', markersize=13),
+        #             Line2D([0], [0], marker='o', color='w', label='Outliers', markerfacecolor='r', markersize=13)]
+        # axes.legend(handles=legend_elements, loc='best')
 
         # Minimum Covariance Determinant
         modelMinCov = MinCovDet(random_state=0)
         modelMinCov.fit(funcMSPlot.points)
         mahaDistance = modelMinCov.mahalanobis(funcMSPlot.points)
 
-        fig, axes = plt.subplots(1, figsize=(7, 5))
-        sp = axes.scatter(funcMSPlot.points[:, 0], funcMSPlot.points[:, 1], c=mahaDistance, s=50, cmap='bwr')
-        fig.colorbar(sp, label='Mahalanobis Distance')
-        axes.set_ylabel("Shape outlyingness")
-        axes.set_xlabel("Magnitude outlyingness")
-        axes.set_title("Minimum Covariance Determinant Score " + label_title)
-        axes.set_facecolor("#F1F0E6")
-        axes.grid(color='w', linestyle='-', linewidth=1)
-        axes.set_axisbelow(True)
+        # fig, axes = plt.subplots(1, figsize=(7, 5))
+        # sp = axes.scatter(funcMSPlot.points[:, 0], funcMSPlot.points[:, 1], c=mahaDistance, s=50, cmap='bwr')
+        # fig.colorbar(sp, label='Mahalanobis Distance')
+        # axes.set_ylabel("Shape outlyingness")
+        # axes.set_xlabel("Magnitude outlyingness")
+        # axes.set_title("Minimum Covariance Determinant Score " + label_title)
+        # axes.set_facecolor("#F1F0E6")
+        # axes.grid(color='w', linestyle='-', linewidth=1)
+        # axes.set_axisbelow(True)
 
         indexMinCov = np.where(mahaDistance >= np.quantile(mahaDistance, 0.875))
         valuesMinCov = funcMSPlot.points[indexMinCov]
 
-        fig, axes = plt.subplots(1, figsize=(6, 5))
-        axes.scatter(funcMSPlot.points[:, 0], funcMSPlot.points[:, 1])
-        axes.scatter(valuesMinCov[:, 0], valuesMinCov[:, 1], color='r')
-        axes.set_title("Minimum Covariance Determinant Binarized " + label_title)
-        axes.set_ylabel("Shape outlyingness")
-        axes.set_xlabel("Magnitude outlyingness")
-        axes.set_facecolor("#F1F0E6")
-        axes.grid(color='w', linestyle='-', linewidth=1)
-        axes.set_axisbelow(True)
-        legend_elements = [Line2D([0], [0], marker='o', color='w', label='No Outliers', markerfacecolor='b', markersize=13),
-                            Line2D([0], [0], marker='o', color='w', label='Outliers', markerfacecolor='r', markersize=13)]
-        axes.legend(handles=legend_elements, loc='best')
+        # fig, axes = plt.subplots(1, figsize=(6, 5))
+        # axes.scatter(funcMSPlot.points[:, 0], funcMSPlot.points[:, 1])
+        # axes.scatter(valuesMinCov[:, 0], valuesMinCov[:, 1], color='r')
+        # axes.set_title("Minimum Covariance Determinant Binarized " + label_title)
+        # axes.set_ylabel("Shape outlyingness")
+        # axes.set_xlabel("Magnitude outlyingness")
+        # axes.set_facecolor("#F1F0E6")
+        # axes.grid(color='w', linestyle='-', linewidth=1)
+        # axes.set_axisbelow(True)
+        # legend_elements = [Line2D([0], [0], marker='o', color='w', label='No Outliers', markerfacecolor='b', markersize=13),
+        #                     Line2D([0], [0], marker='o', color='w', label='Outliers', markerfacecolor='r', markersize=13)]
+        # axes.legend(handles=legend_elements, loc='best')
 
         indexiF = [i for i in indexiF[0]]
         indexMinCov = [i for i in indexMinCov[0]]
@@ -322,19 +320,17 @@ def msplot(varname, depthname, timestamps, depth, cutoff, smootheddata, smoothed
         labels = np.copy(funcMSPlot.outliers.astype(int))
         labels[:] = 0
         labels[indexFinal] = 1
-        
-        # Copy of the labels list for the control charts
-        outliersCCBoosted = list(labels.copy())
+
+        # # Copy of the labels list for the control charts
+        # outliersCCBoosted = list(labels.copy())
         
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
-        # ax1 = fig.add_subplot(1, 1, 1)
 
         ax1.scatter(funcMSPlot.points[:, 0], funcMSPlot.points[:, 1], c=funcMSPlot.colormap(colors))
         ax1.set_title("MS-Plot")
         ax1.set_xlabel("Magnitude outlyingness")
         ax1.set_ylabel("Shape outlyingness")
-        # ax1.add_artist(ellipse)
-        
+
         ax2.set_title(f'Functional weekly data ' + label_title)
         ax2.set_xlabel('Time (15min intervals)')
         ax2.set_ylabel(label_y_axis)
@@ -363,25 +359,25 @@ def msplot(varname, depthname, timestamps, depth, cutoff, smootheddata, smoothed
         for i, j in zip(timestamps, labelsPlotly):
             colorDict.update({i: j})
         
-        # Graph the results
-        fig = go.Figure()
+        # # Graph the results
+        # fig = go.Figure()
         
-        for col in dfPlotly.columns:
-            fig.add_trace(go.Scatter(x=dfPlotly.index, y=dfPlotly[col], mode='lines', name=col, marker_color=colorDict[col]))
+        # for col in dfPlotly.columns:
+        #     fig.add_trace(go.Scatter(x=dfPlotly.index, y=dfPlotly[col], mode='lines', name=col, marker_color=colorDict[col]))
         
         # fig.show()
     
     else:
 
         labels = []
-        outliersCCBoosted = [0] * len(outliersCC)
+        # outliersCCBoosted = [0] * len(outliersCC)
     
     # Get the dates of the outleirs
     outliers = [i for i,j in zip(timestamps, outliersMSPlot) if j == 1]
 
     # print(outIntDepth)
     # print('time stamps:', timeStamps)
-    print('outliers:', np.round(len(outliers)/len(timestamps), 3), outliers)
+    # print('outliers:', np.round(len(outliers)/len(timestamps), 3), outliers)
     
     if all(outliersMSPlot == 0) == False:
 
@@ -391,15 +387,16 @@ def msplot(varname, depthname, timestamps, depth, cutoff, smootheddata, smoothed
 
         dfOutliers = pd.DataFrame(list(zip(outliersMag, outlierShape)), index=outliersBoosted, columns=['magnitud', 'shape'])
         
-        print('outliers boosted:', np.round(len(outliersBoosted)/len(timestamps), 3), outliersBoosted)
-        print(dfOutliers)
-        print('Average magnitude: {} | Average shape: {}'.format(np.average(mag), np.average(shape)))
+        # print('outliers boosted:', np.round(len(outliersBoosted)/len(timestamps), 3), outliersBoosted)
+        # print(dfOutliers)
+        # print('Average magnitude: {} | Average shape: {}'.format(np.average(mag), np.average(shape)))
     
     else:
 
         outliersBoosted = [0] * len(outliersMSPlot)
     
-    return outliers, outliersBoosted, outliersCC, outliersCCBoosted
+    # return outliers, outliersBoosted, outliersCC, outliersCCBoosted
+    return outliers, outliersBoosted
 
 def functionalAnalysis(varname, depthname, datamatrix, timestamps, timeframe, depth, cutoff):
     
@@ -407,10 +404,10 @@ def functionalAnalysis(varname, depthname, datamatrix, timestamps, timeframe, de
 
     smoothedData, smoothedDataGrid = smoothing(datamatrix, gridpoints=gridPoints, functionaldata=functionalData)
     
-    outliers, outliersBoosted, outliersCC, outliersCCBoosted = msplot(varname, depthname, timestamps, depth, cutoff, smootheddata=smoothedData, smootheddatagrid=smoothedDataGrid)
+    outliers, outliersBoosted = msplot(varname, depthname, timestamps, depth, cutoff, smootheddata=smoothedData, smootheddatagrid=smoothedDataGrid)
     
     # outliers, outliersBoosted, outliersCC, outliersCCBoosted = '', '', '', ''
     
-    plt.show()
+    # plt.show()
     
-    return outliers, outliersBoosted, outliersCC, outliersCCBoosted
+    return outliers, outliersBoosted

@@ -45,7 +45,6 @@ if __name__ == '__main__':
         filterer(File=f'{varName}_nor.csv', timeframe=timeFrame)
         print('[INFO] filterer() DONE -> Preprocessing completed')
 
-
     # Read the database with the desired time unit and create dataMatrix and timeStamps
     dataMatrix, timeStamps = builder(File=f'{varName}_pro.csv', timeFrame=timeFrame)
     print('[INFO] builder() DONE')

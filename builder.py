@@ -15,9 +15,10 @@ def toMatrix(l, n):
     return [l[i:i+n] for i in range(0, len(l), n)]
 
 def builder(File, timeFrame):
-    
+
     fileName, fileExtension = os.path.splitext(File)
     df = pd.read_csv(f'Database/{fileName}.csv', delimiter=';') # Set column date as the index?
+
     cols = list(df.columns.values.tolist())
 
     # Select the data in the specified time frame

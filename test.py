@@ -1,105 +1,40 @@
+# See how to get the index to use it in the shape contamination model
+
+import math
 import numpy as np
+import pandas as pd
 
-from matplotlib import pyplot as plt
+df = pd.read_csv('Database/Conductividad_pro.csv', delimiter=';')
 
-data = [171, 173, 174, np.nan, np.nan, 170, 176, 180, np.nan, np.nan, np.nan, 190, 173]
+# new_outliers = [9, 18, 32]
+new_outliers = [6, 9, 18, 32]
+print((df.loc[df['week'] == 9]))
+# Generate the shape outliers
+for i in new_outliers:
 
-data_clean = [i for i in data if np.isnan(i) == False]
-maximum = np.max(data_clean)
-minimum = np.min(data_clean)
+    # Extract the maximum and minimum of the database
+    maximum, mean, minimum = max(df.loc[:, 'value']), np.mean(df.loc[:, 'value']), min(df.loc[:, 'value'])
+    p90, p10 = np.percentile(df.loc[:, 'value'], 90), np.percentile(df.loc[:, 'value'], 10)
+    print(maximum, minimum)
+    # print(p90, p10)
 
-# Get the average amount of variation
-quotient = []
-for i, e in enumerate(data_clean):
+    target = np.mean(df.loc[df['week'] == i, 'value'])
+    print('target', target)
 
-    if i == len(data_clean):
-        break
+    # Get the distances to max and min
+    dist2max, dist2min = maximum - target, target - minimum
 
-    if data_clean[i-1] != 0:
-        result = abs(data_clean[i]-data_clean[i-1])/data_clean[i-1] # Calculates the variation between consec. data points
-        quotient.append(result)
+    # Now define mag_factor based on whether the target is close to the max or min
+    if dist2min < dist2max:
 
-variation = np.average(quotient)
-print(variation)
+        print('por debajo')
 
-# Get the index when there is a change from a NaN to a no-NaN
-nan_jumps = []
-for i, e in enumerate(data):
+        mag_factor = ((minimum / target) - (1 - (target / mean)))
     
-    if np.isnan(data[i-1]) == True and np.isnan(data[i]) == False:
+    elif dist2min > dist2max:
 
-        nan_jumps.append(i)
+        print('por arriba')
 
-counter = 0
-nan_situation = False
-generated_data = []
-for i, e in enumerate(data):
-
-    # Condition at the start of the loop
-    if i == 0:
-        firts_point = data[0]
+        mag_factor = ((maximum / target) - (1 - (mean / target)))
     
-        data_point = np.random.uniform((firts_point*(1-variation)), (firts_point*(1+variation)), size=1)
-    
-        generated_data.append(data_point)
-    
-    else:
-
-        # Calculate the local variation
-        if nan_situation == False:
-
-            local_variation = (data[i]-data[i-1])/(data[i-1])
-
-            if np.isnan(local_variation) == True:
-
-                # local_variation = (data[nan_jumps[counter]]-data[i-1])/data[i-1]
-                local_variation = (data[nan_jumps[counter]]-data[i-1])/(data[i-1])
-                local_variation = local_variation/(nan_jumps[counter]-i)
-
-                counter += 1
-
-                nan_situation = True
-        
-        elif nan_situation == True:
-
-            if i == nan_jumps[counter-1]:
-                nan_situation = False
-            
-            local_variation = local_variation
-
-        preceeding_point = generated_data[-1]
-
-        if local_variation < 0:
-            
-            if nan_situation == True:
-                data_point = np.random.uniform((preceeding_point*(1-abs(local_variation))), preceeding_point, size = 1)
-            
-            else:
-                data_point = np.random.uniform((preceeding_point*(1-abs(variation))), preceeding_point, size = 1)
-
-            generated_data.append(data_point)
-
-        elif local_variation == 0:
-
-            data_point = preceeding_point
-
-            generated_data.append(data_point)
-        
-        elif local_variation > 0:
-            
-            if nan_situation == True:
-                
-                data_point = np.random.uniform(preceeding_point, (preceeding_point*(1+local_variation)), size=1)
-
-            else:
-
-                data_point = np.random.uniform(preceeding_point, (preceeding_point*(1+variation)), size=1)
-
-            generated_data.append(data_point)
-
-        print(local_variation)
-
-plt.plot(data)
-plt.plot(generated_data)
-
-plt.show()
+    print(mag_factor)
